@@ -77,11 +77,19 @@ nsprefixes = {
     'dcmitype': 'http://purl.org/dc/dcmitype/',
     'dcterms':  'http://purl.org/dc/terms/'}
 
+class BaseDocxError(Exception):
+    pass
+
+class BadDocxFile(BaseDocxError):
+    pass
 
 def opendocx(file):
     '''Open a docx file, return a document XML tree'''
-    mydoc = zipfile.ZipFile(file)
-    xmlcontent = mydoc.read('word/document.xml')
+    try:
+        mydoc = zipfile.ZipFile(file)
+        xmlcontent = mydoc.read('word/document.xml')
+    except (zipfile.BadZipfile, KeyError):
+        raise BadDocxFile("File is not a docx file")
     document = etree.fromstring(xmlcontent)
     return document
 
